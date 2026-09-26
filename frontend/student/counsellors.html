@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Find Counsellors - CGMS</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body class="bg-light">
+
+    <div class="d-flex" id="app-layout">
+        <!-- Main Content Area -->
+        <div class="flex-grow-1">
+            <header class="dashboard-header d-flex justify-content-between align-items-center">
+                <h4 class="mb-0 fw-bold">Available Career Counsellors 👨‍🏫</h4>
+                <span class="badge bg-primary-subtle text-primary px-3 py-2 rounded-pill fw-semibold">Role: STUDENT</span>
+            </header>
+
+            <main class="p-4">
+                
+                <div class="mb-4">
+                    <h5 class="fw-bold mb-1">Choose an Expert Counsellor</h5>
+                    <p class="text-muted small">Select a counsellor below to view their available time slots and book a guidance session.</p>
+                </div>
+
+                <!-- Alert container -->
+                <div id="alertBox" class="alert d-none" role="alert"></div>
+
+                <!-- Counsellors Grid Container -->
+                <div class="row g-4" id="counsellorGrid">
+                    <div class="col-12 text-center py-5 text-muted">
+                        <div class="spinner-border text-primary me-2" role="status"></div>
+                        <span>Loading counsellors list...</span>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../js/config.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="sidebar.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const grid = document.getElementById('counsellorGrid');
+            const alertBox = document.getElementById('alertBox');
+
+            try {
+                const res = await apiCall('/student/counsellors');
+
+                if (res.success && res.data && res.data.length > 0) {
+                    grid.innerHTML = res.data.map(c => `
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card h-100 border-0 shadow-sm rounded-4 p-4 d-flex flex-column justify-content-between">
+                                <div>
+                                    <div class="d-flex align-items-center mb-3">
+                                        <div class="bg-primary-subtle text-primary rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px; font-size: 1.4rem;">
+                                            <i class="bi bi-person-badge-fill"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="fw-bold mb-0 text-dark">${c.name}</h6>
+                                            <span class="badge bg-info-subtle text-info-emphasis rounded-pill small">${c.specialization || 'General Guidance'}</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="small text-muted mb-2">
+                                        <i class="bi bi-mortarboard text-secondary me-1"></i> ${c.qualification || 'Certified Counsellor'}
+                                    </div>
+                                    <div class="small text-muted mb-3">
+                                        <i class="bi bi-briefcase text-secondary me-1"></i> ${c.experience || 0} Years Experience
+                                    </div>
+
+                                    <p class="small text-secondary mb-4 opacity-75 line-clamp-3">
+                                        ${c.bio || 'Experienced career counsellor helping students select streams, evaluate skill sets, and navigate college admissions.'}
+                                    </p>
+                                </div>
+
+                                <div>
+                                    <a href="book-appointment.html?counsellorId=${c.id}&name=${encodeURIComponent(c.name)}" class="btn btn-primary-gradient w-100 py-2">
+                                        <i class="bi bi-calendar-event me-1"></i> Book Appointment
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    grid.innerHTML = `
+                        <div class="col-12 text-center py-5">
+                            <i class="bi bi-person-x fs-1 text-muted d-block mb-3"></i>
+                            <h6 class="fw-bold text-muted">No counsellors available right now</h6>
+                            <p class="small text-muted">Please check back later or contact support.</p>
+                        </div>
+                    `;
+                }
+            } catch (err) {
+                alertBox.className = 'alert alert-danger';
+                alertBox.textContent = 'Failed to load counsellors: ' + err.message;
+                alertBox.classList.remove('d-none');
+                grid.innerHTML = '';
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+target/
+*.class
+.idea/
+*.iml
+.vscode/
+application-prod.properties
+.env
+.DS_Store

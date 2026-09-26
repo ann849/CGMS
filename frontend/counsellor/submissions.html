@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Submissions - CGMS</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body class="bg-light">
+
+    <div class="d-flex" id="app-layout">
+        <!-- Main Content Area -->
+        <div class="flex-grow-1">
+            <header class="dashboard-header d-flex justify-content-between align-items-center">
+                <h4 class="mb-0 fw-bold">Student Task Submissions 📥</h4>
+                <span class="badge bg-warning-subtle text-warning-emphasis px-3 py-2 rounded-pill fw-semibold">Role: COUNSELLOR</span>
+            </header>
+
+            <main class="p-4">
+                
+                <!-- Alert Box -->
+                <div id="alertBox" class="alert d-none" role="alert"></div>
+
+                <div class="card border-0 shadow-sm rounded-4 p-4">
+                    <h5 class="fw-bold mb-3"><i class="bi bi-file-earmark-check text-primary me-2"></i> Submissions Pending Evaluation</h5>
+
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Task Title</th>
+                                    <th>Submission Content</th>
+                                    <th>Attachment</th>
+                                    <th>Submitted At</th>
+                                    <th>Marks / Grade</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="submissionsTableBody">
+                                <tr>
+                                    <td colspan="6" class="text-center py-4 text-muted">
+                                        <div class="spinner-border spinner-border-sm me-2"></div> Loading student submissions...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- Evaluate Modal -->
+    <div class="modal fade" id="evaluateModal" tabindex="-1" aria-labelledby="evaluateModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content rounded-4 border-0">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold" id="evaluateModalLabel">Evaluate Student Submission</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="evaluationForm">
+                        <input type="hidden" id="modalSubmissionId">
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Task Title</label>
+                            <input type="text" class="form-control" id="modalTaskTitle" readonly>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="marksOrGrade" class="form-label fw-semibold">Marks or Grade</label>
+                            <input type="text" class="form-control form-control-custom" id="marksOrGrade" placeholder="e.g. A+ or 90/100" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="remarks" class="form-label fw-semibold">Counsellor Remarks & Feedback</label>
+                            <textarea class="form-control form-control-custom" id="remarks" rows="4" placeholder="Provide constructive feedback for the student..." required></textarea>
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" id="evalSubmitBtn" class="btn btn-success">Save Grade & Feedback</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../js/config.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="sidebar.js"></script>
+    <script>
+        let evaluateModalInstance;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            evaluateModalInstance = new bootstrap.Modal(document.getElementById('evaluateModal'));
+            loadSubmissions();
+        });
+
+        async function loadSubmissions() {
+            const tableBody = document.getElementById('submissionsTableBody');
+            const alertBox = document.getElementById('alertBox');
+
+            try {
+                const res = await apiCall('/counsellor/submissions');
+
+                if (res.success && res.data && res.data.length > 0) {
+                    tableBody.innerHTML = res.data.map(s => `
+                        <tr>
+                            <td class="fw-bold text-dark">${s.taskTitle || 'Task'}</td>
+                            <td class="small text-secondary" style="max-width: 250px;">
+                                ${s.submissionText ? s.submissionText : '<em>No text response</em>'}
+                            </td>
+                            <td>
+                                ${s.submissionFile ? `
+                                    <a href="${s.submissionFile}" target="_blank" class="badge bg-primary-subtle text-primary text-decoration-none">
+                                        <i class="bi bi-paperclip me-1"></i> View File
+                                    </a>
+                                ` : '<span class="text-muted small">None</span>'}
+                            </td>
+                            <td class="small text-muted">${formatDateTime(s.submittedAt)}</td>
+                            <td>
+                                ${s.marksOrGrade ? `
+                                    <span class="badge bg-success-subtle text-success">${s.marksOrGrade}</span>
+                                ` : `
+                                    <span class="badge bg-warning-subtle text-warning-emphasis">Pending</span>
+                                `}
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-success" onclick="openEvaluateModal(${s.id}, '${escapeQuotes(s.taskTitle)}', '${escapeQuotes(s.marksOrGrade || '')}', '${escapeQuotes(s.remarks || '')}')">
+                                    <i class="bi bi-award me-1"></i> ${s.marksOrGrade ? 'Edit Grade' : 'Evaluate'}
+                                </button>
+                            </td>
+                        </tr>
+                    `).join('');
+                } else {
+                    tableBody.innerHTML = `
+                        <tr>
+                            <td colspan="6" class="text-center py-5 text-muted">
+                                <i class="bi bi-file-earmark-x fs-1 d-block mb-2 text-muted"></i>
+                                No student task submissions pending evaluation.
+                            </td>
+                        </tr>
+                    `;
+                }
+            } catch (err) {
+                alertBox.className = 'alert alert-danger';
+                alertBox.textContent = 'Failed to load submissions: ' + err.message;
+                alertBox.classList.remove('d-none');
+                tableBody.innerHTML = '';
+            }
+        }
+
+        function openEvaluateModal(id, title, existingGrade, existingRemarks) {
+            document.getElementById('modalSubmissionId').value = id;
+            document.getElementById('modalTaskTitle').value = title;
+            document.getElementById('marksOrGrade').value = existingGrade;
+            document.getElementById('remarks').value = existingRemarks;
+            evaluateModalInstance.show();
+        }
+
+        document.getElementById('evaluationForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const subId = document.getElementById('modalSubmissionId').value;
+            const marksOrGrade = document.getElementById('marksOrGrade').value.trim();
+            const remarks = document.getElementById('remarks').value.trim();
+            const evalSubmitBtn = document.getElementById('evalSubmitBtn');
+
+            evalSubmitBtn.disabled = true;
+
+            try {
+                const res = await apiCall(`/counsellor/submissions/${subId}/evaluate`, 'PUT', {
+                    marksOrGrade,
+                    remarks
+                });
+
+                if (res.success) {
+                    evaluateModalInstance.hide();
+                    const alertBox = document.getElementById('alertBox');
+                    alertBox.className = 'alert alert-success';
+                    alertBox.textContent = 'Submission evaluated successfully!';
+                    alertBox.classList.remove('d-none');
+                    loadSubmissions();
+                }
+            } catch (err) {
+                alert('Evaluation failed: ' + err.message);
+            } finally {
+                evalSubmitBtn.disabled = false;
+            }
+        });
+
+        function formatDateTime(dtStr) {
+            if (!dtStr) return 'Recently';
+            const dt = new Date(dtStr);
+            return dt.toLocaleDateString() + ' ' + dt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+
+        function escapeQuotes(str) {
+            return (str || '').replace(/'/g, "\\'");
+        }
+    </script>
+</body>
+</html>

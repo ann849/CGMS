@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Students - CGMS Admin</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body class="bg-light">
+
+    <div class="d-flex" id="app-layout">
+        <!-- Main Content Area -->
+        <div class="flex-grow-1">
+            <header class="dashboard-header d-flex justify-content-between align-items-center">
+                <h4 class="mb-0 fw-bold">Manage Student Accounts 🎓</h4>
+                <span class="badge bg-danger-subtle text-danger-emphasis px-3 py-2 rounded-pill fw-semibold">Role: ADMIN</span>
+            </header>
+
+            <main class="p-4">
+                
+                <!-- Alert Box -->
+                <div id="alertBox" class="alert d-none" role="alert"></div>
+
+                <div class="card border-0 shadow-sm rounded-4 p-4">
+                    <h5 class="fw-bold mb-3"><i class="bi bi-people-fill text-primary me-2"></i> Registered Students Directory</h5>
+
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Student Name</th>
+                                    <th>Email</th>
+                                    <th>Phone</th>
+                                    <th>Education</th>
+                                    <th>Account Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="studentsTableBody">
+                                <tr>
+                                    <td colspan="7" class="text-center py-4 text-muted">
+                                        <div class="spinner-border spinner-border-sm me-2"></div> Loading student directory...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../js/config.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="sidebar.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', loadStudents);
+
+        async function loadStudents() {
+            const tableBody = document.getElementById('studentsTableBody');
+            const alertBox = document.getElementById('alertBox');
+
+            try {
+                const res = await apiCall('/admin/students');
+
+                if (res.success && res.data && res.data.length > 0) {
+                    tableBody.innerHTML = res.data.map(s => `
+                        <tr>
+                            <td class="fw-bold">#${s.id}</td>
+                            <td class="fw-semibold">${s.name}</td>
+                            <td>${s.email}</td>
+                            <td>${s.phone || 'N/A'}</td>
+                            <td><span class="badge bg-info-subtle text-info-emphasis">${s.education || 'Undergraduate'}</span></td>
+                            <td>
+                                ${s.isActive !== false ? `
+                                    <span class="badge bg-success-subtle text-success"><i class="bi bi-check-circle-fill me-1"></i> ACTIVE</span>
+                                ` : `
+                                    <span class="badge bg-danger-subtle text-danger"><i class="bi bi-x-circle-fill me-1"></i> INACTIVE</span>
+                                `}
+                            </td>
+                            <td>
+                                ${s.isActive !== false ? `
+                                    <button class="btn btn-sm btn-outline-danger" onclick="toggleStudentStatus(${s.id}, false)">
+                                        <i class="bi bi-slash-circle me-1"></i> Deactivate
+                                    </button>
+                                ` : `
+                                    <button class="btn btn-sm btn-outline-success" onclick="toggleStudentStatus(${s.id}, true)">
+                                        <i class="bi bi-check2-circle me-1"></i> Activate
+                                    </button>
+                                `}
+                            </td>
+                        </tr>
+                    `).join('');
+                } else {
+                    tableBody.innerHTML = `
+                        <tr>
+                            <td colspan="7" class="text-center py-5 text-muted">
+                                No student accounts registered yet.
+                            </td>
+                        </tr>
+                    `;
+                }
+            } catch (err) {
+                alertBox.className = 'alert alert-danger';
+                alertBox.textContent = 'Failed to load students: ' + err.message;
+                alertBox.classList.remove('d-none');
+                tableBody.innerHTML = '';
+            }
+        }
+
+        async function toggleStudentStatus(id, newStatus) {
+            const alertBox = document.getElementById('alertBox');
+            try {
+                const res = await apiCall(`/admin/students/${id}/status`, 'PUT', { isActive: newStatus });
+                if (res.success) {
+                    alertBox.className = 'alert alert-success';
+                    alertBox.textContent = `Student #${id} account status changed to ${newStatus ? 'ACTIVE' : 'INACTIVE'}`;
+                    alertBox.classList.remove('d-none');
+                    loadStudents();
+                }
+            } catch (err) {
+                alert('Status update failed: ' + err.message);
+            }
+        }
+    </script>
+</body>
+</html>

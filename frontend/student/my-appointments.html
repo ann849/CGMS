@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Appointments - CGMS</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body class="bg-light">
+
+    <div class="d-flex" id="app-layout">
+        <!-- Main Content Area -->
+        <div class="flex-grow-1">
+            <header class="dashboard-header d-flex justify-content-between align-items-center">
+                <h4 class="mb-0 fw-bold">My Guidance Sessions 📅</h4>
+                <a href="counsellors.html" class="btn btn-primary-gradient btn-sm"><i class="bi bi-plus-lg me-1"></i> Book New Session</a>
+            </header>
+
+            <main class="p-4">
+                
+                <!-- Alert Box -->
+                <div id="alertBox" class="alert d-none" role="alert"></div>
+
+                <div class="card border-0 shadow-sm rounded-4 p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold mb-0"><i class="bi bi-list-check text-primary me-2"></i> Appointment History</h5>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Appt #</th>
+                                    <th>Counsellor</th>
+                                    <th>Specialization</th>
+                                    <th>Date & Time</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="appointmentsTableBody">
+                                <tr>
+                                    <td colspan="6" class="text-center py-4 text-muted">
+                                        <div class="spinner-border spinner-border-sm me-2"></div> Loading your appointments...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../js/config.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="sidebar.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const tableBody = document.getElementById('appointmentsTableBody');
+            const alertBox = document.getElementById('alertBox');
+
+            try {
+                const res = await apiCall('/student/appointments');
+
+                if (res.success && res.data && res.data.length > 0) {
+                    tableBody.innerHTML = res.data.map(a => `
+                        <tr>
+                            <td class="fw-bold">#${a.id}</td>
+                            <td class="fw-semibold">${a.counsellorName || 'Counsellor'}</td>
+                            <td><span class="badge bg-secondary-subtle text-secondary">${a.counsellorSpecialization || 'Guidance'}</span></td>
+                            <td>${formatDateTime(a.appointmentDate || a.slotDate)}</td>
+                            <td>${getStatusBadge(a.status)}</td>
+                            <td>
+                                ${a.status === 'PENDING' ? `
+                                    <a href="payment.html?appointmentId=${a.id}&amount=500" class="btn btn-sm btn-warning text-dark font-weight-bold">
+                                        <i class="bi bi-credit-card me-1"></i> Pay Now
+                                    </a>
+                                ` : `
+                                    <span class="text-muted small"><i class="bi bi-check-circle-fill text-success me-1"></i> Confirmed</span>
+                                `}
+                            </td>
+                        </tr>
+                    `).join('');
+                } else {
+                    tableBody.innerHTML = `
+                        <tr>
+                            <td colspan="6" class="text-center py-5 text-muted">
+                                <i class="bi bi-calendar-x fs-2 d-block mb-2 text-muted"></i>
+                                You haven't booked any appointments yet.
+                            </td>
+                        </tr>
+                    `;
+                }
+            } catch (err) {
+                alertBox.className = 'alert alert-danger';
+                alertBox.textContent = 'Failed to load appointments: ' + err.message;
+                alertBox.classList.remove('d-none');
+                tableBody.innerHTML = '';
+            }
+        });
+
+        function getStatusBadge(status) {
+            switch (status) {
+                case 'CONFIRMED': return '<span class="badge bg-success-subtle text-success">CONFIRMED</span>';
+                case 'PENDING': return '<span class="badge bg-warning-subtle text-warning-emphasis">PENDING PAYMENT</span>';
+                case 'COMPLETED': return '<span class="badge bg-primary-subtle text-primary">COMPLETED</span>';
+                case 'CANCELLED': return '<span class="badge bg-danger-subtle text-danger">CANCELLED</span>';
+                default: return `<span class="badge bg-secondary-subtle text-secondary">${status}</span>`;
+            }
+        }
+
+        function formatDateTime(dtStr) {
+            if (!dtStr) return 'TBD';
+            const dt = new Date(dtStr);
+            return dt.toLocaleDateString() + ' ' + dt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+    </script>
+</body>
+</html>

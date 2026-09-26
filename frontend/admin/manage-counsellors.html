@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Counsellors - CGMS Admin</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body class="bg-light">
+
+    <div class="d-flex" id="app-layout">
+        <!-- Main Content Area -->
+        <div class="flex-grow-1">
+            <header class="dashboard-header d-flex justify-content-between align-items-center">
+                <h4 class="mb-0 fw-bold">Manage Counsellor Accounts 👨‍🏫</h4>
+                <button class="btn btn-primary-gradient btn-sm" onclick="openAddModal()">
+                    <i class="bi bi-person-plus-fill me-1"></i> Add New Counsellor
+                </button>
+            </header>
+
+            <main class="p-4">
+                
+                <!-- Alert Box -->
+                <div id="alertBox" class="alert d-none" role="alert"></div>
+
+                <div class="card border-0 shadow-sm rounded-4 p-4">
+                    <h5 class="fw-bold mb-3"><i class="bi bi-person-workspace text-primary me-2"></i> Registered Counsellors Directory</h5>
+
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Counsellor Name</th>
+                                    <th>Email</th>
+                                    <th>Specialization</th>
+                                    <th>Experience</th>
+                                    <th>Account Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="counsellorsTableBody">
+                                <tr>
+                                    <td colspan="7" class="text-center py-4 text-muted">
+                                        <div class="spinner-border spinner-border-sm me-2"></div> Loading counsellor directory...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- Add Counsellor Modal -->
+    <div class="modal fade" id="addCounsellorModal" tabindex="-1" aria-labelledby="addCounsellorModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content rounded-4 border-0">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold" id="addCounsellorModalLabel">Create Counsellor Credentials</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addCounsellorForm">
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label for="counsellorName" class="form-label fw-semibold">Full Name</label>
+                                <input type="text" class="form-control form-control-custom" id="counsellorName" placeholder="Dr. Sarah Connor" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="counsellorEmail" class="form-label fw-semibold">Email Address</label>
+                                <input type="email" class="form-control form-control-custom" id="counsellorEmail" placeholder="sarah@cgms.com" required>
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label for="counsellorPassword" class="form-label fw-semibold">Initial Password</label>
+                                <input type="password" class="form-control form-control-custom" id="counsellorPassword" placeholder="••••••••" required minlength="6">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="counsellorPhone" class="form-label fw-semibold">Phone Number</label>
+                                <input type="text" class="form-control form-control-custom" id="counsellorPhone" placeholder="+1234567890">
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label for="counsellorQualification" class="form-label fw-semibold">Qualification</label>
+                                <input type="text" class="form-control form-control-custom" id="counsellorQualification" placeholder="e.g. Ph.D Educational Psychology">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="counsellorSpecialization" class="form-label fw-semibold">Specialization</label>
+                                <input type="text" class="form-control form-control-custom" id="counsellorSpecialization" placeholder="e.g. Overseas & Tech Careers">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="counsellorExperience" class="form-label fw-semibold">Years of Experience</label>
+                            <input type="number" class="form-control form-control-custom" id="counsellorExperience" value="5" min="0">
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="counsellorBio" class="form-label fw-semibold">Bio / Overview</label>
+                            <textarea class="form-control form-control-custom" id="counsellorBio" rows="3" placeholder="Brief summary of professional experience..."></textarea>
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" id="addModalBtn" class="btn btn-primary-gradient">Create Account</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../js/config.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="sidebar.js"></script>
+    <script>
+        let addModalInstance;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            addModalInstance = new bootstrap.Modal(document.getElementById('addCounsellorModal'));
+            loadCounsellors();
+        });
+
+        async function loadCounsellors() {
+            const tableBody = document.getElementById('counsellorsTableBody');
+            const alertBox = document.getElementById('alertBox');
+
+            try {
+                const res = await apiCall('/admin/counsellors');
+
+                if (res.success && res.data && res.data.length > 0) {
+                    tableBody.innerHTML = res.data.map(c => `
+                        <tr>
+                            <td class="fw-bold">#${c.id}</td>
+                            <td class="fw-semibold">${c.name}</td>
+                            <td>${c.email}</td>
+                            <td><span class="badge bg-warning-subtle text-warning-emphasis">${c.specialization || 'Guidance'}</span></td>
+                            <td>${c.experience || 0} Years</td>
+                            <td>
+                                ${c.isActive !== false ? `
+                                    <span class="badge bg-success-subtle text-success"><i class="bi bi-check-circle-fill me-1"></i> ACTIVE</span>
+                                ` : `
+                                    <span class="badge bg-danger-subtle text-danger"><i class="bi bi-x-circle-fill me-1"></i> INACTIVE</span>
+                                `}
+                            </td>
+                            <td>
+                                ${c.isActive !== false ? `
+                                    <button class="btn btn-sm btn-outline-danger" onclick="toggleCounsellorStatus(${c.id}, false)">
+                                        <i class="bi bi-slash-circle me-1"></i> Deactivate
+                                    </button>
+                                ` : `
+                                    <button class="btn btn-sm btn-outline-success" onclick="toggleCounsellorStatus(${c.id}, true)">
+                                        <i class="bi bi-check2-circle me-1"></i> Activate
+                                    </button>
+                                `}
+                            </td>
+                        </tr>
+                    `).join('');
+                } else {
+                    tableBody.innerHTML = `
+                        <tr>
+                            <td colspan="7" class="text-center py-5 text-muted">
+                                No counsellor accounts registered yet. Click "Add New Counsellor" above to create one.
+                            </td>
+                        </tr>
+                    `;
+                }
+            } catch (err) {
+                alertBox.className = 'alert alert-danger';
+                alertBox.textContent = 'Failed to load counsellors: ' + err.message;
+                alertBox.classList.remove('d-none');
+                tableBody.innerHTML = '';
+            }
+        }
+
+        function openAddModal() {
+            document.getElementById('addCounsellorForm').reset();
+            addModalInstance.show();
+        }
+
+        document.getElementById('addCounsellorForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const alertBox = document.getElementById('alertBox');
+            const addModalBtn = document.getElementById('addModalBtn');
+
+            addModalBtn.disabled = true;
+
+            const payload = {
+                name: document.getElementById('counsellorName').value.trim(),
+                email: document.getElementById('counsellorEmail').value.trim(),
+                password: document.getElementById('counsellorPassword').value.trim(),
+                phone: document.getElementById('counsellorPhone').value.trim(),
+                qualification: document.getElementById('counsellorQualification').value.trim(),
+                specialization: document.getElementById('counsellorSpecialization').value.trim(),
+                experience: parseInt(document.getElementById('counsellorExperience').value) || 0,
+                bio: document.getElementById('counsellorBio').value.trim()
+            };
+
+            try {
+                const res = await apiCall('/admin/counsellors', 'POST', payload);
+
+                if (res.success) {
+                    addModalInstance.hide();
+                    alertBox.className = 'alert alert-success';
+                    alertBox.textContent = 'New Counsellor account created successfully!';
+                    alertBox.classList.remove('d-none');
+                    loadCounsellors();
+                }
+            } catch (err) {
+                alert('Creation failed: ' + err.message);
+            } finally {
+                addModalBtn.disabled = false;
+            }
+        });
+
+        async function toggleCounsellorStatus(id, newStatus) {
+            const alertBox = document.getElementById('alertBox');
+            try {
+                const res = await apiCall(`/admin/counsellors/${id}/status`, 'PUT', { isActive: newStatus });
+                if (res.success) {
+                    alertBox.className = 'alert alert-success';
+                    alertBox.textContent = `Counsellor #${id} account status changed to ${newStatus ? 'ACTIVE' : 'INACTIVE'}`;
+                    alertBox.classList.remove('d-none');
+                    loadCounsellors();
+                }
+            } catch (err) {
+                alert('Status update failed: ' + err.message);
+            }
+        }
+    </script>
+</body>
+</html>

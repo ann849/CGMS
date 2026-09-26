@@ -1,0 +1,177 @@
+/* Modern Career Guidance Management System (CGMS) Theme */
+
+:root {
+    --primary-gradient: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    --secondary-gradient: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%);
+    --accent-gradient: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
+    --dark-bg: #0f172a;
+    --card-bg: rgba(255, 255, 255, 0.95);
+    --glass-bg: rgba(255, 255, 255, 0.15);
+    --glass-border: rgba(255, 255, 255, 0.25);
+    --text-dark: #1e293b;
+    --text-light: #f8fafc;
+    --radius-lg: 16px;
+    --radius-md: 10px;
+    --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.08);
+    --shadow-glow: 0 15px 35px rgba(79, 70, 229, 0.25);
+    --transition-fast: all 0.3s ease;
+}
+
+body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background-color: #f1f5f9;
+    color: var(--text-dark);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Hero & Auth Background */
+.hero-auth-bg {
+    background: radial-gradient(circle at 10% 20%, rgba(79, 70, 229, 0.85) 0%, rgba(15, 23, 42, 0.95) 90%),
+                url('https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1600&q=80') center/cover no-repeat;
+    min-height: 100vh;
+    position: relative;
+}
+
+/* Glassmorphism Card */
+.glass-card {
+    background: var(--card-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-glow);
+    overflow: hidden;
+}
+
+/* Brand styling */
+.brand-logo {
+    font-weight: 800;
+    font-size: 1.6rem;
+    background: var(--primary-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: -0.5px;
+}
+
+/* Custom Tabs */
+.nav-pills-custom .nav-link {
+    color: #64748b;
+    font-weight: 600;
+    border-radius: var(--radius-md);
+    padding: 10px 20px;
+    transition: var(--transition-fast);
+}
+
+.nav-pills-custom .nav-link.active {
+    background: var(--primary-gradient);
+    color: white;
+    box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4);
+}
+
+/* Custom Inputs */
+.form-control-custom, .form-select-custom {
+    border-radius: var(--radius-md);
+    border: 1.5px solid #e2e8f0;
+    padding: 12px 16px;
+    font-size: 0.95rem;
+    transition: var(--transition-fast);
+}
+
+.form-control-custom:focus, .form-select-custom:focus {
+    border-color: #6366f1;
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
+}
+
+/* Role Selector Badges */
+.role-badge-option {
+    cursor: pointer;
+    border: 2px solid #e2e8f0;
+    border-radius: var(--radius-md);
+    padding: 14px 10px;
+    text-align: center;
+    transition: var(--transition-fast);
+    background: #fff;
+}
+
+.role-badge-option:hover {
+    border-color: #a5b4fc;
+    transform: translateY(-2px);
+}
+
+.role-badge-option.active {
+    border-color: #6366f1;
+    background: rgba(99, 102, 241, 0.06);
+    color: #4338ca;
+    font-weight: 700;
+}
+
+/* Buttons */
+.btn-primary-gradient {
+    background: var(--primary-gradient);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-md);
+    padding: 12px 24px;
+    font-weight: 600;
+    box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
+    transition: var(--transition-fast);
+}
+
+.btn-primary-gradient:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(79, 70, 229, 0.45);
+    color: #fff;
+}
+
+/* Dashboard Sidebar & Topbar */
+.dashboard-sidebar {
+    width: 260px;
+    background: #1e293b;
+    color: #fff;
+    min-height: 100vh;
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.05);
+}
+
+.sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 20px;
+    color: #94a3b8;
+    text-decoration: none;
+    border-radius: var(--radius-md);
+    margin: 4px 12px;
+    transition: var(--transition-fast);
+    font-weight: 500;
+}
+
+.sidebar-link:hover, .sidebar-link.active {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+}
+
+.sidebar-link.active {
+    background: var(--primary-gradient);
+}
+
+.dashboard-header {
+    background: #ffffff;
+    border-bottom: 1px solid #e2e8f0;
+    padding: 16px 28px;
+}
+
+.stat-card {
+    background: #fff;
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    box-shadow: var(--shadow-soft);
+    border: 1px solid #f1f5f9;
+    transition: var(--transition-fast);
+}
+
+.stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.08);
+}

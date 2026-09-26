@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Counsellor Dashboard - CGMS</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body class="bg-light">
+
+    <div class="d-flex" id="app-layout">
+        <!-- Main Content Area -->
+        <div class="flex-grow-1">
+            <header class="dashboard-header d-flex justify-content-between align-items-center">
+                <h4 class="mb-0 fw-bold">Welcome, Dr. <span id="headerCounsellorName">Counsellor</span> 🌟</h4>
+                <span class="badge bg-warning-subtle text-warning-emphasis px-3 py-2 rounded-pill fw-semibold">Role: COUNSELLOR</span>
+            </header>
+
+            <main class="p-4">
+                
+                <!-- Stat Cards Row -->
+                <div class="row g-4 mb-4">
+                    <div class="col-md-4">
+                        <div class="stat-card border-start border-warning border-4">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="text-muted small fw-bold text-uppercase">Appointments</div>
+                                    <div class="fs-2 fw-bold mt-1 text-dark" id="countAppointments">0</div>
+                                </div>
+                                <div class="bg-warning-subtle text-warning-emphasis p-3 rounded-circle fs-4">
+                                    <i class="bi bi-calendar-event"></i>
+                                </div>
+                            </div>
+                            <div class="mt-3">
+                                <a href="appointments.html" class="small text-warning-emphasis text-decoration-none fw-semibold">Manage Appointments <i class="bi bi-arrow-right"></i></a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="stat-card border-start border-primary border-4">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="text-muted small fw-bold text-uppercase">Active Time Slots</div>
+                                    <div class="fs-2 fw-bold mt-1 text-dark" id="countSlots">0</div>
+                                </div>
+                                <div class="bg-primary-subtle text-primary p-3 rounded-circle fs-4">
+                                    <i class="bi bi-clock-history"></i>
+                                </div>
+                            </div>
+                            <div class="mt-3">
+                                <a href="availability.html" class="small text-primary text-decoration-none fw-semibold">Manage Slots <i class="bi bi-arrow-right"></i></a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="stat-card border-start border-success border-4">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="text-muted small fw-bold text-uppercase">Pending Submissions</div>
+                                    <div class="fs-2 fw-bold mt-1 text-dark" id="countSubmissions">0</div>
+                                </div>
+                                <div class="bg-success-subtle text-success p-3 rounded-circle fs-4">
+                                    <i class="bi bi-file-earmark-check"></i>
+                                </div>
+                            </div>
+                            <div class="mt-3">
+                                <a href="submissions.html" class="small text-success text-decoration-none fw-semibold">Evaluate Now <i class="bi bi-arrow-right"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Shortcuts Card -->
+                <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
+                    <h5 class="fw-bold mb-3"><i class="bi bi-gear-wide-connected text-primary me-2"></i> Counsellor Workspace Actions</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6 col-lg-3">
+                            <a href="availability.html" class="btn btn-outline-warning text-dark w-100 p-3 text-start rounded-3 text-decoration-none d-block">
+                                <i class="bi bi-plus-circle fs-3 d-block mb-2 text-warning"></i>
+                                <strong>Add Availability Slots</strong>
+                                <div class="small text-muted">Publish open session dates</div>
+                            </a>
+                        </div>
+                        <div class="col-md-6 col-lg-3">
+                            <a href="appointments.html" class="btn btn-outline-warning text-dark w-100 p-3 text-start rounded-3 text-decoration-none d-block">
+                                <i class="bi bi-calendar-check fs-3 d-block mb-2 text-warning"></i>
+                                <strong>Review Bookings</strong>
+                                <div class="small text-muted">Confirm or complete sessions</div>
+                            </a>
+                        </div>
+                        <div class="col-md-6 col-lg-3">
+                            <a href="assign-task.html" class="btn btn-outline-warning text-dark w-100 p-3 text-start rounded-3 text-decoration-none d-block">
+                                <i class="bi bi-pencil-square fs-3 d-block mb-2 text-warning"></i>
+                                <strong>Assign Student Tasks</strong>
+                                <div class="small text-muted">Send homework & exercises</div>
+                            </a>
+                        </div>
+                        <div class="col-md-6 col-lg-3">
+                            <a href="submissions.html" class="btn btn-outline-warning text-dark w-100 p-3 text-start rounded-3 text-decoration-none d-block">
+                                <i class="bi bi-check2-square fs-3 d-block mb-2 text-warning"></i>
+                                <strong>Grade Submissions</strong>
+                                <div class="small text-muted">Provide marks & feedback</div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../js/config.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="sidebar.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const [apptsRes, slotsRes, subsRes] = await Promise.all([
+                    apiCall('/counsellor/appointments'),
+                    apiCall('/counsellor/availability'),
+                    apiCall('/counsellor/submissions')
+                ]);
+
+                if (apptsRes.success) document.getElementById('countAppointments').textContent = apptsRes.data.length;
+                if (slotsRes.success) document.getElementById('countSlots').textContent = slotsRes.data.length;
+                if (subsRes.success) document.getElementById('countSubmissions').textContent = subsRes.data.length;
+
+            } catch (err) {
+                console.error('Error fetching counsellor stats:', err);
+            }
+        });
+    </script>
+</body>
+</html>

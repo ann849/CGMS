@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Audits - CGMS Admin</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body class="bg-light">
+
+    <div class="d-flex" id="app-layout">
+        <!-- Main Content Area -->
+        <div class="flex-grow-1">
+            <header class="dashboard-header d-flex justify-content-between align-items-center">
+                <h4 class="mb-0 fw-bold">Payment Transaction Audits 💳</h4>
+                <span class="badge bg-danger-subtle text-danger-emphasis px-3 py-2 rounded-pill fw-semibold">Role: ADMIN</span>
+            </header>
+
+            <main class="p-4">
+                
+                <!-- Filter Toolbar -->
+                <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
+                    <h6 class="fw-bold mb-3"><i class="bi bi-funnel-fill text-primary me-2"></i> Filter Transactions</h6>
+                    <form id="filterForm" class="row g-3 align-items-end">
+                        <div class="col-md-3">
+                            <label class="form-label small fw-semibold">Payment Status</label>
+                            <select class="form-select form-select-custom" id="filterStatus">
+                                <option value="">All Statuses</option>
+                                <option value="SUCCESS">SUCCESS</option>
+                                <option value="PENDING">PENDING</option>
+                                <option value="FAILED">FAILED</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small fw-semibold">Start Date</label>
+                            <input type="date" class="form-control form-control-custom" id="filterStartDate">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small fw-semibold">End Date</label>
+                            <input type="date" class="form-control form-control-custom" id="filterEndDate">
+                        </div>
+                        <div class="col-md-3">
+                            <button type="submit" class="btn btn-primary-gradient w-100 py-2">
+                                <i class="bi bi-search me-1"></i> Apply Filter
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Alert Box -->
+                <div id="alertBox" class="alert d-none" role="alert"></div>
+
+                <div class="card border-0 shadow-sm rounded-4 p-4">
+                    <h5 class="fw-bold mb-3"><i class="bi bi-receipt text-success me-2"></i> Transaction Log</h5>
+
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Pay ID</th>
+                                    <th>Transaction ID</th>
+                                    <th>Student Name</th>
+                                    <th>Appt #</th>
+                                    <th>Amount</th>
+                                    <th>Method</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="paymentsTableBody">
+                                <tr>
+                                    <td colspan="8" class="text-center py-4 text-muted">
+                                        <div class="spinner-border spinner-border-sm me-2"></div> Loading transaction logs...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../js/config.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="sidebar.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => loadPayments());
+
+        document.getElementById('filterForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            loadPayments();
+        });
+
+        async function loadPayments() {
+            const tableBody = document.getElementById('paymentsTableBody');
+            const alertBox = document.getElementById('alertBox');
+
+            const status = document.getElementById('filterStatus').value;
+            const startDate = document.getElementById('filterStartDate').value;
+            const endDate = document.getElementById('filterEndDate').value;
+
+            let query = [];
+            if (status) query.push(`status=${encodeURIComponent(status)}`);
+            if (startDate) query.push(`startDate=${encodeURIComponent(startDate)}`);
+            if (endDate) query.push(`endDate=${encodeURIComponent(endDate)}`);
+
+            const queryString = query.length ? '?' + query.join('&') : '';
+
+            try {
+                const res = await apiCall(`/admin/payments${queryString}`);
+
+                if (res.success && res.data && res.data.length > 0) {
+                    tableBody.innerHTML = res.data.map(p => `
+                        <tr>
+                            <td class="fw-bold">#${p.id}</td>
+                            <td><code>${p.transactionId || 'N/A'}</code></td>
+                            <td class="fw-semibold">${p.studentName || 'Student'}</td>
+                            <td>#${p.appointmentId}</td>
+                            <td class="fw-bold text-success">$${parseFloat(p.amount || 0).toFixed(2)}</td>
+                            <td><span class="badge bg-secondary-subtle text-secondary">${p.paymentMethod || 'CARD'}</span></td>
+                            <td class="small text-muted">${formatDateTime(p.paymentDate)}</td>
+                            <td>${getPaymentStatusBadge(p.status)}</td>
+                        </tr>
+                    `).join('');
+                } else {
+                    tableBody.innerHTML = `
+                        <tr>
+                            <td colspan="8" class="text-center py-5 text-muted">
+                                No payment transactions found matching criteria.
+                            </td>
+                        </tr>
+                    `;
+                }
+            } catch (err) {
+                alertBox.className = 'alert alert-danger';
+                alertBox.textContent = 'Failed to load payments: ' + err.message;
+                alertBox.classList.remove('d-none');
+                tableBody.innerHTML = '';
+            }
+        }
+
+        function getPaymentStatusBadge(status) {
+            switch (status) {
+                case 'SUCCESS': return '<span class="badge bg-success-subtle text-success">SUCCESS</span>';
+                case 'PENDING': return '<span class="badge bg-warning-subtle text-warning-emphasis">PENDING</span>';
+                case 'FAILED': return '<span class="badge bg-danger-subtle text-danger">FAILED</span>';
+                default: return `<span class="badge bg-secondary-subtle text-secondary">${status}</span>`;
+            }
+        }
+
+        function formatDateTime(dtStr) {
+            if (!dtStr) return 'N/A';
+            const dt = new Date(dtStr);
+            return dt.toLocaleDateString() + ' ' + dt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+    </script>
+</body>
+</html>

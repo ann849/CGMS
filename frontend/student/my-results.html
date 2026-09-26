@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Results - CGMS</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body class="bg-light">
+
+    <div class="d-flex" id="app-layout">
+        <!-- Main Content Area -->
+        <div class="flex-grow-1">
+            <header class="dashboard-header d-flex justify-content-between align-items-center">
+                <h4 class="mb-0 fw-bold">Evaluated Results & Feedback 🏆</h4>
+                <span class="badge bg-primary-subtle text-primary px-3 py-2 rounded-pill fw-semibold">Role: STUDENT</span>
+            </header>
+
+            <main class="p-4">
+                
+                <!-- Alert Box -->
+                <div id="alertBox" class="alert d-none" role="alert"></div>
+
+                <div class="card border-0 shadow-sm rounded-4 p-4">
+                    <h5 class="fw-bold mb-3"><i class="bi bi-award text-success me-2"></i> Assessment Performance & Counsellor Remarks</h5>
+
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Task Title</th>
+                                    <th>Evaluated By</th>
+                                    <th>Marks / Grade</th>
+                                    <th>Counsellor Remarks</th>
+                                    <th>Evaluated At</th>
+                                </tr>
+                            </thead>
+                            <tbody id="resultsTableBody">
+                                <tr>
+                                    <td colspan="5" class="text-center py-4 text-muted">
+                                        <div class="spinner-border spinner-border-sm me-2"></div> Loading evaluated results...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../js/config.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="sidebar.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const tableBody = document.getElementById('resultsTableBody');
+            const alertBox = document.getElementById('alertBox');
+
+            try {
+                const res = await apiCall('/student/results');
+
+                if (res.success && res.data && res.data.length > 0) {
+                    tableBody.innerHTML = res.data.map(r => `
+                        <tr>
+                            <td class="fw-bold text-dark">${r.taskTitle || 'Career Task'}</td>
+                            <td><i class="bi bi-person-badge text-primary me-1"></i> ${r.counsellorName}</td>
+                            <td>
+                                <span class="badge bg-success-subtle text-success fs-6 px-3 py-2">
+                                    <i class="bi bi-star-fill text-warning me-1"></i> ${r.marksOrGrade || 'Pass / Evaluated'}
+                                </span>
+                            </td>
+                            <td class="text-secondary small" style="max-width: 300px;">
+                                ${r.remarks || 'Great job! Keep working on your skill assessment recommendations.'}
+                            </td>
+                            <td class="small text-muted">${formatDate(r.evaluatedAt || r.submittedAt)}</td>
+                        </tr>
+                    `).join('');
+                } else {
+                    tableBody.innerHTML = `
+                        <tr>
+                            <td colspan="5" class="text-center py-5 text-muted">
+                                <i class="bi bi-award fs-1 d-block mb-2 text-muted"></i>
+                                No evaluated assignments found yet. Complete your assigned tasks to receive marks & feedback!
+                            </td>
+                        </tr>
+                    `;
+                }
+            } catch (err) {
+                alertBox.className = 'alert alert-danger';
+                alertBox.textContent = 'Failed to load results: ' + err.message;
+                alertBox.classList.remove('d-none');
+                tableBody.innerHTML = '';
+            }
+        });
+
+        function formatDate(dtStr) {
+            if (!dtStr) return 'Recently';
+            const dt = new Date(dtStr);
+            return dt.toLocaleDateString();
+        }
+    </script>
+</body>
+</html>
